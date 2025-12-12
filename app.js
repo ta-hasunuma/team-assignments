@@ -239,25 +239,13 @@ class AppController {
    * @private
    */
   _handleExportImage() {
-    // Get current teams from result container
-    const teamCards = this.teamResultContainer.querySelectorAll(".team-card");
-
-    if (teamCards.length === 0) {
+    // Use stored teams if available
+    if (!this.lastTeams || this.lastTeams.length === 0) {
       alert("チーム分け結果がありません");
       return;
     }
 
-    // Extract teams from DOM (temporary until task 5 stores teams in state)
-    const teams = Array.from(teamCards).map((card) => {
-      const memberItems = card.querySelectorAll(".team-member-list li");
-      return {
-        members: Array.from(memberItems).map((li) => ({
-          name: li.textContent,
-        })),
-      };
-    });
-
-    const result = this.exportImage(teams);
+    const result = this.imageExporter.exportAsImage(this.lastTeams);
 
     if (!result.ok) {
       alert(result.error);
@@ -932,8 +920,181 @@ class ImageExporter {
    * @returns {Object} Result with success or error
    */
   exportAsImage(teams, format = "png") {
-    // Will be implemented in task 6.1
-    return okResult(undefined);
+    try {
+      // Validate input
+      if (!teams || teams.length === 0) {
+        return errorResult("チーム結果がありません");
+      }
+
+      // Create canvas and draw teams
+      const canvas = this._createCanvas(teams);
+      const ctx = canvas.getContext("2d");
+      this._drawTeams(ctx, teams, canvas.width, canvas.height);
+
+      // Convert to data URL
+      const dataURL = this._canvasToDataURL(canvas);
+
+      // Generate filename and trigger download
+      const filename = this._generateFilename();
+      this._triggerDownload(dataURL, filename);
+
+      return okResult(undefined);
+    } catch (error) {
+      return errorResult(`画像の生成に失敗しました: ${error.message}`);
+    }
+  }
+
+  /**
+   * Create canvas element with appropriate dimensions
+   * @private
+   * @param {Array} teams - Team array
+   * @returns {HTMLCanvasElement} Canvas element
+   */
+  _createCanvas(teams) {
+    const canvas = document.createElement("canvas");
+
+    // Calculate dimensions based on content
+    const padding = 40;
+    const teamSpacing = 30;
+    const lineHeight = 30;
+    const headerHeight = 50;
+
+    // Calculate max members in any team
+    const maxMembers = Math.max(...teams.map((t) => t.members.length));
+
+    // Width: enough for team cards side by side (up to 3 columns)
+    const cardWidth = 250;
+    const columns = Math.min(teams.length, 3);
+    canvas.width =
+      padding * 2 + cardWidth * columns + teamSpacing * (columns - 1);
+
+    // Height: based on number of rows needed
+    const rows = Math.ceil(teams.length / columns);
+    const cardHeight = headerHeight + maxMembers * lineHeight + padding;
+    canvas.height = padding * 2 + cardHeight * rows + teamSpacing * (rows - 1);
+
+    return canvas;
+  }
+
+  /**
+   * Draw teams on canvas
+   * @private
+   * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
+   * @param {Array} teams - Team array
+   * @param {number} width - Canvas width
+   * @param {number} height - Canvas height
+   */
+  _drawTeams(ctx, teams, width, height) {
+    // Fill background
+    ctx.fillStyle = "#f5f5f5";
+    ctx.fillRect(0, 0, width, height);
+
+    // Set font for Japanese text
+    ctx.font = "16px sans-serif";
+    ctx.textBaseline = "top";
+
+    const padding = 40;
+    const teamSpacing = 30;
+    const cardWidth = 250;
+    const lineHeight = 30;
+    const headerHeight = 50;
+    const columns = Math.min(teams.length, 3);
+
+    teams.forEach((team, index) => {
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+
+      const x = padding + col * (cardWidth + teamSpacing);
+      const y =
+        padding +
+        row *
+          (headerHeight +
+            team.members.length * lineHeight +
+            padding +
+            teamSpacing);
+
+      // Draw card background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(
+        x,
+        y,
+        cardWidth,
+        headerHeight + team.members.length * lineHeight + 20
+      );
+
+      // Draw card border
+      ctx.strokeStyle = "#e0e0e0";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        x,
+        y,
+        cardWidth,
+        headerHeight + team.members.length * lineHeight + 20
+      );
+
+      // Draw team header
+      ctx.fillStyle = "#2196f3";
+      ctx.fillRect(x, y, cardWidth, headerHeight);
+
+      // Draw team name
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px sans-serif";
+      ctx.fillText(
+        `${team.name || `チーム${index + 1}`} (${team.members.length}人)`,
+        x + 10,
+        y + 15
+      );
+
+      // Draw members
+      ctx.fillStyle = "#212121";
+      ctx.font = "16px sans-serif";
+      team.members.forEach((member, memberIndex) => {
+        const memberY = y + headerHeight + 10 + memberIndex * lineHeight;
+        ctx.fillText(`• ${member.name}`, x + 10, memberY);
+      });
+    });
+  }
+
+  /**
+   * Convert canvas to PNG data URL
+   * @private
+   * @param {HTMLCanvasElement} canvas - Canvas element
+   * @returns {string} Data URL
+   */
+  _canvasToDataURL(canvas) {
+    return canvas.toDataURL("image/png");
+  }
+
+  /**
+   * Generate timestamped filename
+   * @private
+   * @returns {string} Filename in format teams-YYYYMMDD-HHMMSS.png
+   */
+  _generateFilename() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    return `teams-${year}${month}${day}-${hours}${minutes}${seconds}.png`;
+  }
+
+  /**
+   * Trigger download of data URL
+   * @private
+   * @param {string} dataURL - Data URL
+   * @param {string} filename - Filename
+   */
+  _triggerDownload(dataURL, filename) {
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }
 

@@ -107,25 +107,25 @@
   - 結果を上書き表示(DOM 更新) ✓
   - _Requirements: 6.1, 6.2, 6.3, 8.4_
 
-- [ ] 6. 画像保存機能
-- [ ] 6.1 ImageExporter コンポーネントを実装
+- [x] 6. 画像保存機能
+- [x] 6.1 ImageExporter コンポーネントを実装
 
-  - exportAsImage()でチーム結果を画像化
-  - createCanvas()で Canvas 要素を動的に生成
-  - drawTeams()で Canvas 2D コンテキストにチーム情報を描画(チーム名、メンバー名、日本語フォント対応)
-  - canvasToDataURL()で PNG 形式の Data URL を生成
-  - triggerDownload()でダウンロードリンク作成とクリックトリガー(タイムスタンプ付きファイル名: teams-YYYYMMDD-HHMMSS.png)
-  - Canvas 描画のレイアウト設計(視認可能なフォントサイズ、適切な余白)
+  - exportAsImage()でチーム結果を画像化 ✓
+  - createCanvas()で Canvas 要素を動的に生成 ✓
+  - drawTeams()で Canvas 2D コンテキストにチーム情報を描画(チーム名、メンバー名、日本語フォント対応) ✓
+  - canvasToDataURL()で PNG 形式の Data URL を生成 ✓
+  - triggerDownload()でダウンロードリンク作成とクリックトリガー(タイムスタンプ付きファイル名: teams-YYYYMMDD-HHMMSS.png) ✓
+  - Canvas 描画のレイアウト設計(視認可能なフォントサイズ、適切な余白) ✓
   - _Requirements: 7.2, 7.3, 7.4_
 
-- [ ] 6.2 画像保存ボタン UI を実装
+- [x] 6.2 画像保存ボタン UI を実装
 
-  - 「画像保存」ボタンの HTML 要素を作成
-  - チーム分け結果表示後にボタンを表示
-  - ボタンクリック時に AppController.exportImage()を呼び出し
-  - ImageExporter.exportAsImage()実行とエラーハンドリング
-  - 成功時のフィードバック表示(任意、トースト通知など)
-  - 失敗時のエラーメッセージ表示
+  - 「画像保存」ボタンの HTML 要素を作成 ✓
+  - チーム分け結果表示後にボタンを表示 ✓
+  - ボタンクリック時に AppController.exportImage()を呼び出し ✓
+  - ImageExporter.exportAsImage()実行とエラーハンドリング ✓
+  - 成功時のフィードバック表示(任意、トースト通知など) ✓
+  - 失敗時のエラーメッセージ表示 ✓
   - _Requirements: 7.1, 7.2, 7.3, 8.4_
 
 - [ ] 7. エラーハンドリングとバリデーション強化

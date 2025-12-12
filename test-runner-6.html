@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TDD Test Runner - Task 6 (Image Export)</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+        margin: 0;
+        height: 100vh;
+        box-sizing: border-box;
+      }
+
+      #test-output {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 20px;
+        overflow-y: auto;
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 14px;
+        border-radius: 4px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      #app-container {
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: white;
+      }
+
+      h2 {
+        margin-top: 0;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="test-output">
+      <h2>Test Results (Task 6.1 & 6.2)</h2>
+      <div id="test-results"></div>
+    </div>
+
+    <div id="app-container">
+      <h2 style="padding: 20px; margin: 0; border-bottom: 1px solid #ccc">
+        App Preview
+      </h2>
+      <div style="padding: 20px">
+        <!-- Member List Section -->
+        <section id="member-list-section">
+          <h2>メンバー一覧</h2>
+          <button id="add-member-btn" class="btn btn-primary">
+            メンバーを追加
+          </button>
+          <div id="member-list-container"></div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings-section">
+          <h2>チーム分け設定</h2>
+          <form id="team-assignment-form">
+            <div class="form-group">
+              <label>
+                <input type="radio" name="mode" value="teamCount" checked />
+                チーム数を指定
+              </label>
+              <input type="number" id="team-count-input" min="1" value="2" />
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="radio" name="mode" value="teamSize" />
+                チーム人数を指定
+              </label>
+              <input
+                type="number"
+                id="team-size-input"
+                min="1"
+                value="3"
+                disabled
+              />
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="radio" name="mode" value="constraint" />
+                制約付き分割
+              </label>
+              <div class="constraint-options">
+                <select id="constraint-type">
+                  <option value="hiragana">ひらがなメンバーのみ</option>
+                  <option value="katakana">カタカナメンバーのみ</option>
+                </select>
+                <input
+                  type="number"
+                  id="constraint-count"
+                  min="0"
+                  placeholder="人数"
+                  disabled
+                />
+                <input
+                  type="number"
+                  id="other-team-count"
+                  min="1"
+                  placeholder="残りのチーム数"
+                  disabled
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              チーム分けを実行
+            </button>
+          </form>
+        </section>
+
+        <!-- Team Result Section -->
+        <section id="team-result-section" style="display: none">
+          <h2>チーム分け結果</h2>
+          <div style="margin-bottom: 1rem">
+            <button id="toggle-view-btn" class="btn">表示切替</button>
+            <button id="re-execute-btn" class="btn">再実行</button>
+            <button id="export-image-btn" class="btn">画像として保存</button>
+          </div>
+          <div id="team-result-container"></div>
+        </section>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="app.test-6.js"></script>
+    <script>
+      // Redirect console to test output
+      const testResults = document.getElementById("test-results");
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+
+      console.log = function (...args) {
+        testResults.textContent += args.join(" ") + "\n";
+        originalLog.apply(console, args);
+      };
+
+      console.error = function (...args) {
+        testResults.textContent += "❌ " + args.join(" ") + "\n";
+        originalError.apply(console, args);
+      };
+
+      console.warn = function (...args) {
+        testResults.textContent += "⚠ " + args.join(" ") + "\n";
+        originalWarn.apply(console, args);
+      };
+
+      // Run tests
+      window.addEventListener("DOMContentLoaded", () => {
+        runTask6Tests();
+      });
+    </script>
+  </body>
+</html>
