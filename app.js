@@ -50,8 +50,193 @@ class AppController {
    * - Load initial members
    */
   init() {
-    // Will be implemented in subsequent tasks
-    console.log("AppController initialized");
+    // Get DOM references
+    this.memberListContainer = document.getElementById("member-list-container");
+    this.addMemberBtn = document.getElementById("add-member-btn");
+
+    // Register event listeners
+    this.addMemberBtn.addEventListener("click", () =>
+      this._showAddMemberForm()
+    );
+
+    // Render initial members
+    this._renderMemberList();
+
+    console.log("AppController initialized with member list UI");
+  }
+
+  /**
+   * Render member list to DOM
+   * @private
+   */
+  _renderMemberList() {
+    const members = this.memberManager.getMembers();
+
+    this.memberListContainer.innerHTML = members
+      .map(
+        (member) => `
+      <div class="member-item" data-member-id="${member.id}">
+        <span class="member-name">${member.name}</span>
+        <span class="member-type">(${
+          member.type === "hiragana" ? "ひらがな" : "カタカナ"
+        })</span>
+        <button class="edit-member-btn btn btn-secondary">編集</button>
+        <button class="delete-member-btn btn btn-secondary">削除</button>
+      </div>
+    `
+      )
+      .join("");
+
+    // Attach event listeners to all buttons
+    this.memberListContainer
+      .querySelectorAll(".edit-member-btn")
+      .forEach((btn) => {
+        btn.addEventListener("click", (e) => this._handleEditMember(e));
+      });
+
+    this.memberListContainer
+      .querySelectorAll(".delete-member-btn")
+      .forEach((btn) => {
+        btn.addEventListener("click", (e) => this._handleDeleteMember(e));
+      });
+  }
+
+  /**
+   * Show add member form
+   * @private
+   */
+  _showAddMemberForm() {
+    // Check if form already exists
+    let form = document.querySelector(".add-member-form");
+
+    if (!form) {
+      // Create form
+      form = document.createElement("div");
+      form.className = "add-member-form";
+      form.innerHTML = `
+        <div class="form-group">
+          <input type="text" name="member-name" placeholder="メンバー名" class="member-name-input">
+          <select name="member-type" class="member-type-select">
+            <option value="hiragana">ひらがな</option>
+            <option value="katakana">カタカナ</option>
+          </select>
+          <button class="submit-add-btn btn btn-primary">追加</button>
+          <button class="cancel-add-btn btn btn-secondary">キャンセル</button>
+        </div>
+      `;
+
+      // Insert form after add button
+      this.addMemberBtn.parentElement.appendChild(form);
+
+      // Attach event listeners
+      form
+        .querySelector(".submit-add-btn")
+        .addEventListener("click", () => this._handleAddMember());
+      form
+        .querySelector(".cancel-add-btn")
+        .addEventListener("click", () => this._hideAddMemberForm());
+    }
+
+    form.style.display = "block";
+  }
+
+  /**
+   * Hide add member form
+   * @private
+   */
+  _hideAddMemberForm() {
+    const form = document.querySelector(".add-member-form");
+    if (form) {
+      form.style.display = "none";
+      form.querySelector('input[name="member-name"]').value = "";
+    }
+  }
+
+  /**
+   * Handle add member submission
+   * @private
+   */
+  _handleAddMember() {
+    const form = document.querySelector(".add-member-form");
+    const nameInput = form.querySelector('input[name="member-name"]');
+    const typeSelect = form.querySelector('select[name="member-type"]');
+
+    const result = this.memberManager.addMember(
+      nameInput.value,
+      typeSelect.value
+    );
+
+    if (result.ok) {
+      this._renderMemberList();
+      this._hideAddMemberForm();
+    } else {
+      alert(result.error);
+    }
+  }
+
+  /**
+   * Handle edit member click
+   * @private
+   */
+  _handleEditMember(event) {
+    const memberItem = event.target.closest(".member-item");
+    const memberId = memberItem.dataset.memberId;
+    const nameSpan = memberItem.querySelector(".member-name");
+    const currentName = nameSpan.textContent;
+
+    // Replace name span with input
+    nameSpan.style.display = "none";
+
+    let editInput = memberItem.querySelector(".member-name-input");
+    if (!editInput) {
+      editInput = document.createElement("input");
+      editInput.type = "text";
+      editInput.className = "member-name-input";
+      editInput.value = currentName;
+      nameSpan.parentElement.insertBefore(editInput, nameSpan);
+
+      // Change edit button to save button
+      const editBtn = memberItem.querySelector(".edit-member-btn");
+      editBtn.textContent = "保存";
+      editBtn.className = "save-edit-btn btn btn-primary";
+      editBtn.onclick = () => this._handleSaveEdit(memberId);
+    }
+  }
+
+  /**
+   * Handle save edit
+   * @private
+   */
+  _handleSaveEdit(memberId) {
+    const memberItem = document.querySelector(`[data-member-id="${memberId}"]`);
+    const editInput = memberItem.querySelector(".member-name-input");
+
+    const result = this.memberManager.updateMember(memberId, editInput.value);
+
+    if (result.ok) {
+      this._renderMemberList();
+    } else {
+      alert(result.error);
+    }
+  }
+
+  /**
+   * Handle delete member click
+   * @private
+   */
+  _handleDeleteMember(event) {
+    const memberItem = event.target.closest(".member-item");
+    const memberId = memberItem.dataset.memberId;
+
+    if (confirm("このメンバーを削除しますか?")) {
+      const result = this.memberManager.deleteMember(memberId);
+
+      if (result.ok) {
+        this._renderMemberList();
+      } else {
+        alert(result.error);
+      }
+    }
   }
 
   /**
@@ -101,8 +286,34 @@ class MemberManager {
    * Initialize members (load from SessionStorage or create defaults)
    */
   initializeMembers() {
-    // Will be implemented in task 2.1
-    console.log("MemberManager initialized");
+    const stored = sessionStorage.getItem(this.storageKey);
+
+    if (stored) {
+      // Load existing members from SessionStorage
+      this.members = JSON.parse(stored);
+    } else {
+      // Create default members (5 hiragana + 5 katakana)
+      this.members = [
+        { id: this._generateUUID(), name: "あ", type: "hiragana" },
+        { id: this._generateUUID(), name: "い", type: "hiragana" },
+        { id: this._generateUUID(), name: "う", type: "hiragana" },
+        { id: this._generateUUID(), name: "え", type: "hiragana" },
+        { id: this._generateUUID(), name: "お", type: "hiragana" },
+        { id: this._generateUUID(), name: "ア", type: "katakana" },
+        { id: this._generateUUID(), name: "イ", type: "katakana" },
+        { id: this._generateUUID(), name: "ウ", type: "katakana" },
+        { id: this._generateUUID(), name: "エ", type: "katakana" },
+        { id: this._generateUUID(), name: "オ", type: "katakana" },
+      ];
+
+      this._saveToStorage();
+    }
+
+    console.log(
+      "MemberManager initialized with",
+      this.members.length,
+      "members"
+    );
   }
 
   /**
@@ -110,7 +321,6 @@ class MemberManager {
    * @returns {Array} Member array
    */
   getMembers() {
-    // Will be implemented in task 2.1
     return this.members;
   }
 
@@ -121,8 +331,28 @@ class MemberManager {
    * @returns {Object} Result with member or error
    */
   addMember(name, type) {
-    // Will be implemented in task 2.1
-    return okResult({ id: "", name, type });
+    // Validate name
+    if (!name || name.trim().length === 0) {
+      return errorResult("メンバー名を入力してください");
+    }
+
+    // Validate type
+    if (type !== "hiragana" && type !== "katakana") {
+      return errorResult(
+        "メンバー種別は'hiragana'または'katakana'である必要があります"
+      );
+    }
+
+    const newMember = {
+      id: this._generateUUID(),
+      name: name.trim(),
+      type: type,
+    };
+
+    this.members.push(newMember);
+    this._saveToStorage();
+
+    return okResult(newMember);
   }
 
   /**
@@ -132,8 +362,22 @@ class MemberManager {
    * @returns {Object} Result with member or error
    */
   updateMember(id, name) {
-    // Will be implemented in task 2.1
-    return okResult({ id, name, type: "hiragana" });
+    // Validate name
+    if (!name || name.trim().length === 0) {
+      return errorResult("メンバー名を入力してください");
+    }
+
+    // Find member
+    const memberIndex = this.members.findIndex((m) => m.id === id);
+    if (memberIndex === -1) {
+      return errorResult("指定されたメンバーが見つかりません");
+    }
+
+    // Update member
+    this.members[memberIndex].name = name.trim();
+    this._saveToStorage();
+
+    return okResult(this.members[memberIndex]);
   }
 
   /**
@@ -142,8 +386,41 @@ class MemberManager {
    * @returns {Object} Result with success or error
    */
   deleteMember(id) {
-    // Will be implemented in task 2.1
+    // Find member
+    const memberIndex = this.members.findIndex((m) => m.id === id);
+    if (memberIndex === -1) {
+      return errorResult("指定されたメンバーが見つかりません");
+    }
+
+    // Remove member
+    this.members.splice(memberIndex, 1);
+    this._saveToStorage();
+
     return okResult(true);
+  }
+
+  /**
+   * Save members to SessionStorage
+   * @private
+   */
+  _saveToStorage() {
+    sessionStorage.setItem(this.storageKey, JSON.stringify(this.members));
+  }
+
+  /**
+   * Generate a simple UUID (v4-like)
+   * @private
+   * @returns {string} UUID string
+   */
+  _generateUUID() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      }
+    );
   }
 }
 

@@ -23,8 +23,8 @@
   - Result 型のヘルパー関数を実装(okResult, errorResult)
   - _Requirements: 10.1_
 
-- [ ] 2. メンバー管理機能
-- [ ] 2.1 MemberManager コンポーネントを実装
+- [x] 2. メンバー管理機能
+- [x] 2.1 MemberManager コンポーネントを実装
 
   - SessionStorage キー('team-assignment-members')の定義
   - initializeMembers()で初期メンバー 10 人(ひらがな 5 人、カタカナ 5 人)を初期化
@@ -35,7 +35,7 @@
   - 空文字列入力の入力バリデーション
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 10.2, 10.3_
 
-- [ ] 2.2 メンバーリスト UI コンポーネントを実装
+- [x] 2.2 メンバーリスト UI コンポーネントを実装
 
   - MemberListSection の HTML 構造を作成(テーブルまたはリスト形式)
   - 初期メンバー表示機能(DOM へのレンダリング)

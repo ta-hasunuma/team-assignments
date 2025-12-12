@@ -201,12 +201,75 @@ footer {
 
 #member-list-container {
   min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--border-color);
+}
+
+.member-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.member-type {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.member-name-input {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: var(--border-width) solid var(--primary-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+}
+
+.edit-member-btn,
+.delete-member-btn,
+.save-edit-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
 }
 
 .member-actions {
   margin-top: var(--spacing-md);
   display: flex;
   gap: var(--spacing-sm);
+}
+
+.add-member-form {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--border-color);
+}
+
+.add-member-form .form-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.add-member-form input[type="text"],
+.add-member-form select {
+  flex: 1;
+  min-width: 150px;
+}
+
+.add-member-form .btn {
+  white-space: nowrap;
 }
 
 /* ==========================================
