@@ -66,24 +66,24 @@
   - モード切り替え時の入力フィールド表示/非表示制御
   - _Requirements: 2.1, 3.1, 4.1, 4.2, 8.4_
 
-- [ ] 4. AppController とチーム分け実行フロー
-- [ ] 4.1 AppController コンポーネントを実装
+- [x] 4. AppController とチーム分け実行フロー
+- [x] 4.1 AppController コンポーネントを実装
 
-  - init()で DOM 要素参照取得とイベントリスナー登録
-  - executeTeamAssignment()でチーム分け実行フロー(MemberManager→TeamAssignmentEngine→UI 更新)
-  - チーム分け設定の収集とバリデーション(TeamAssignmentConfig 生成)
-  - reExecuteTeamAssignment()で前回設定を保持し再実行
-  - エラーハンドリング(Result 型処理、エラーメッセージ表示)
-  - 最後の設定をメモリに保持(再抽選用)
+  - init()で DOM 要素参照取得とイベントリスナー登録 ✓
+  - executeTeamAssignment()でチーム分け実行フロー(MemberManager→TeamAssignmentEngine→UI 更新) ✓
+  - チーム分け設定の収集とバリデーション(TeamAssignmentConfig 生成) ✓
+  - reExecuteTeamAssignment()で前回設定を保持し再実行 ✓
+  - エラーハンドリング(Result 型処理、エラーメッセージ表示) ✓
+  - 最後の設定をメモリに保持(再抽選用) ✓
   - _Requirements: 2.2, 2.3, 2.4, 3.2, 3.3, 3.4, 4.3, 4.4, 6.2, 6.3_
 
-- [ ] 4.2 チーム分け実行ボタンと UI フローを実装
+- [x] 4.2 チーム分け実行ボタンと UI フローを実装
 
-  - 「チーム分け実行」ボタンのイベントハンドラ
-  - executeTeamAssignment()呼び出しとエラー処理
-  - ローディング状態の表示(任意、8.3 で即座表示のため最小限)
-  - 成功時のチーム結果表示エリア遷移
-  - 失敗時のエラーメッセージ表示(フォーム下またはモーダル)
+  - 「チーム分け実行」ボタンのイベントハンドラ ✓
+  - executeTeamAssignment()呼び出しとエラー処理 ✓
+  - ローディング状態の表示(任意、8.3 で即座表示のため最小限) ✓
+  - 成功時のチーム結果表示エリア遷移 ✓
+  - 失敗時のエラーメッセージ表示(フォーム下またはモーダル) ✓
   - _Requirements: 2.4, 3.4, 4.4, 8.3, 8.4_
 
 - [ ] 5. チーム分け結果表示

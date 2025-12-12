@@ -63,6 +63,12 @@ class AppController {
     this.constraintCount = document.getElementById("constraint-count");
     this.otherTeamCount = document.getElementById("other-team-count");
 
+    // Get DOM references - Team Result
+    this.teamResultSection = document.getElementById("team-result-section");
+    this.teamResultContainer = document.getElementById("team-result-container");
+    this.reExecuteBtn = document.getElementById("re-execute-btn");
+    this.exportImageBtn = document.getElementById("export-image-btn");
+
     // Register event listeners - Member List
     this.addMemberBtn.addEventListener("click", () =>
       this._showAddMemberForm()
@@ -76,6 +82,19 @@ class AppController {
     this.teamAssignmentForm.addEventListener("submit", (e) =>
       this._handleFormSubmit(e)
     );
+
+    // Register event listeners - Team Result
+    if (this.reExecuteBtn) {
+      this.reExecuteBtn.addEventListener("click", () =>
+        this._handleReExecute()
+      );
+    }
+
+    if (this.exportImageBtn) {
+      this.exportImageBtn.addEventListener("click", () =>
+        this._handleExportImage()
+      );
+    }
 
     // Initialize UI state
     this._handleModeChange();
@@ -162,8 +181,50 @@ class AppController {
       };
     }
 
-    // Execute team assignment (will be implemented in task 4)
+    // Execute team assignment
     const result = this.executeTeamAssignment(config);
+
+    if (!result.ok) {
+      alert(result.error);
+    }
+  }
+
+  /**
+   * Handle re-execute button click
+   * @private
+   */
+  _handleReExecute() {
+    const result = this.reExecuteTeamAssignment();
+
+    if (!result.ok) {
+      alert(result.error);
+    }
+  }
+
+  /**
+   * Handle export image button click
+   * @private
+   */
+  _handleExportImage() {
+    // Get current teams from result container
+    const teamCards = this.teamResultContainer.querySelectorAll(".team-card");
+
+    if (teamCards.length === 0) {
+      alert("チーム分け結果がありません");
+      return;
+    }
+
+    // Extract teams from DOM (temporary until task 5 stores teams in state)
+    const teams = Array.from(teamCards).map((card) => {
+      const memberItems = card.querySelectorAll(".team-member-list li");
+      return {
+        members: Array.from(memberItems).map((li) => ({
+          name: li.textContent,
+        })),
+      };
+    });
+
+    const result = this.exportImage(teams);
 
     if (!result.ok) {
       alert(result.error);
@@ -345,14 +406,67 @@ class AppController {
   }
 
   /**
-   * Execute team assignment
+   * Display team assignment results in UI
+   * @param {Array} teams - Array of team objects
+   * @private
+   */
+  _showTeamResults(teams) {
+    // Show result section
+    this.teamResultSection.style.display = "block";
+
+    // Clear previous results
+    this.teamResultContainer.innerHTML = "";
+
+    // Render each team
+    teams.forEach((team, index) => {
+      const teamCard = document.createElement("div");
+      teamCard.className = "team-card";
+
+      const teamHeader = document.createElement("h3");
+      teamHeader.textContent = `チーム ${index + 1} (${team.members.length}人)`;
+
+      const memberList = document.createElement("ul");
+      memberList.className = "team-member-list";
+
+      team.members.forEach((member) => {
+        const li = document.createElement("li");
+        li.textContent = member.name;
+        memberList.appendChild(li);
+      });
+
+      teamCard.appendChild(teamHeader);
+      teamCard.appendChild(memberList);
+      this.teamResultContainer.appendChild(teamCard);
+    });
+
+    // Scroll to results
+    this.teamResultSection.scrollIntoView({ behavior: "smooth" });
+  }
+
+  /**
+   * Execute team assignment with configuration
    * @param {Object} config - Team assignment configuration
    * @returns {Object} Result with teams or error
    */
   executeTeamAssignment(config) {
-    // Will be implemented in subsequent tasks
+    // Get current members
+    const members = this.memberManager.getMembers();
+
+    // Call team assignment engine
+    const result = this.teamAssignmentEngine.assignTeams(members, config);
+
+    // If assignment failed, return error
+    if (!result.ok) {
+      return result;
+    }
+
+    // Store config for re-execution
     this.lastConfig = config;
-    return okResult([]);
+
+    // Display results in UI
+    this._showTeamResults(result.value);
+
+    return result;
   }
 
   /**
