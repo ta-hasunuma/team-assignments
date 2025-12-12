@@ -1,119 +1,124 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task 9 Tests - Deployment Preparation</title>
-  <style>
-    body {
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f5f5f5;
-    }
-    .test-info {
-      background: #e3f2fd;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    .test-info h2 {
-      margin-top: 0;
-      color: #1976d2;
-    }
-    .btn {
-      background: #2196f3;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      margin: 10px 5px 0 0;
-    }
-    .btn:hover {
-      background: #1976d2;
-    }
-    #console-output {
-      background: #000;
-      color: #0f0;
-      padding: 20px;
-      border-radius: 8px;
-      font-family: "Courier New", monospace;
-      white-space: pre-wrap;
-      max-height: 600px;
-      overflow-y: auto;
-      line-height: 1.6;
-    }
-    .success {
-      background: #4caf50;
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-  </style>
-</head>
-<body>
-  <h1>📦 Task 9 Tests: GitHub Pages Deployment Preparation</h1>
-  
-  <div class="test-info">
-    <h2>テストカバレッジ</h2>
-    <ul>
-      <li><strong>9.1 ドキュメント作成:</strong> README.md完全性検証</li>
-      <li><strong>ファイル配置:</strong> GitHub Pages要件確認</li>
-      <li><strong>受入基準:</strong> 要件9.1, 9.2, 9.3の検証</li>
-    </ul>
-    <button onclick="runTask9Tests()" class="btn">テスト実行</button>
-    <button onclick="openREADME()" class="btn" style="background: #ff9800;">README.mdを確認</button>
-    <button onclick="openApp()" class="btn" style="background: #4caf50;">アプリを開く</button>
-  </div>
-  
-  <div class="success">
-    <strong>✅ Task 9 完了チェックリスト:</strong>
-    <ul>
-      <li>✅ README.md作成完了</li>
-      <li>✅ アプリ概要、使用方法を記載</li>
-      <li>✅ 技術スタック説明</li>
-      <li>✅ GitHub Pagesデプロイ手順記載</li>
-      <li>✅ ブラウザ互換性情報記載</li>
-      <li>✅ ファイル配置確認(index.html, style.css, app.js)</li>
-    </ul>
-  </div>
-  
-  <h2>📋 コンソール出力:</h2>
-  <div id="console-output"></div>
-  
-  <script src="app.test-9.js"></script>
-  
-  <script>
-    // Capture console output
-    const consoleOutput = document.getElementById("console-output");
-    const originalLog = console.log;
-    const originalError = console.error;
-    const originalWarn = console.warn;
-    
-    console.log = function(...args) {
-      originalLog.apply(console, args);
-      consoleOutput.textContent += args.join(" ") + "\n";
-    };
-    
-    console.error = function(...args) {
-      originalError.apply(console, args);
-      consoleOutput.textContent += "❌ ERROR: " + args.join(" ") + "\n";
-    };
-    
-    console.warn = function(...args) {
-      originalWarn.apply(console, args);
-      consoleOutput.textContent += "⚠️  WARN: " + args.join(" ") + "\n";
-    };
-    
-    function openREADME() {
-      window.open('README.md', '_blank');
-    }
-    
-    function openApp() {
-      window.open('index.html', '_blank');
-    }
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task 9 Tests - Deployment Preparation</title>
+    <style>
+      body {
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f5f5;
+      }
+      .test-info {
+        background: #e3f2fd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .test-info h2 {
+        margin-top: 0;
+        color: #1976d2;
+      }
+      .btn {
+        background: #2196f3;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 5px 0 0;
+      }
+      .btn:hover {
+        background: #1976d2;
+      }
+      #console-output {
+        background: #000;
+        color: #0f0;
+        padding: 20px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        white-space: pre-wrap;
+        max-height: 600px;
+        overflow-y: auto;
+        line-height: 1.6;
+      }
+      .success {
+        background: #4caf50;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📦 Task 9 Tests: GitHub Pages Deployment Preparation</h1>
+
+    <div class="test-info">
+      <h2>テストカバレッジ</h2>
+      <ul>
+        <li><strong>9.1 ドキュメント作成:</strong> README.md完全性検証</li>
+        <li><strong>ファイル配置:</strong> GitHub Pages要件確認</li>
+        <li><strong>受入基準:</strong> 要件9.1, 9.2, 9.3の検証</li>
+      </ul>
+      <button onclick="runTask9Tests()" class="btn">テスト実行</button>
+      <button onclick="openREADME()" class="btn" style="background: #ff9800">
+        README.mdを確認
+      </button>
+      <button onclick="openApp()" class="btn" style="background: #4caf50">
+        アプリを開く
+      </button>
+    </div>
+
+    <div class="success">
+      <strong>✅ Task 9 完了チェックリスト:</strong>
+      <ul>
+        <li>✅ README.md作成完了</li>
+        <li>✅ アプリ概要、使用方法を記載</li>
+        <li>✅ 技術スタック説明</li>
+        <li>✅ GitHub Pagesデプロイ手順記載</li>
+        <li>✅ ブラウザ互換性情報記載</li>
+        <li>✅ ファイル配置確認(index.html, style.css, app.js)</li>
+      </ul>
+    </div>
+
+    <h2>📋 コンソール出力:</h2>
+    <div id="console-output"></div>
+
+    <script src="app.test-9.js"></script>
+
+    <script>
+      // Capture console output
+      const consoleOutput = document.getElementById("console-output");
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+
+      console.log = function (...args) {
+        originalLog.apply(console, args);
+        consoleOutput.textContent += args.join(" ") + "\n";
+      };
+
+      console.error = function (...args) {
+        originalError.apply(console, args);
+        consoleOutput.textContent += "❌ ERROR: " + args.join(" ") + "\n";
+      };
+
+      console.warn = function (...args) {
+        originalWarn.apply(console, args);
+        consoleOutput.textContent += "⚠️  WARN: " + args.join(" ") + "\n";
+      };
+
+      function openREADME() {
+        window.open("README.md", "_blank");
+      }
+
+      function openApp() {
+        window.open("index.html", "_blank");
+      }
+    </script>
+  </body>
 </html>
