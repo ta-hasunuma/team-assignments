@@ -1,83 +1,116 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NAiSプロジェクトチーム向けランダムチーム分けWebアプリケーション">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="NAiSプロジェクトチーム向けランダムチーム分けWebアプリケーション"
+    />
     <title>チーム分けアプリ for NAiS</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <header>
-        <h1>チーム分けアプリ for NAiS</h1>
-        <p class="subtitle">ランダムなチーム分けをワンクリックで実行</p>
+      <h1>チーム分けアプリ for NAiS</h1>
+      <p class="subtitle">ランダムなチーム分けをワンクリックで実行</p>
     </header>
 
     <main>
-        <section id="member-list-section" class="card">
-            <h2>メンバー管理</h2>
-            <div id="member-list-container">
-                <!-- メンバーリストがここに動的に表示される -->
-            </div>
-            <div class="member-actions">
-                <button id="add-member-btn" class="btn btn-secondary">メンバー追加</button>
-            </div>
-        </section>
+      <section id="member-list-section" class="card">
+        <h2>メンバー管理</h2>
+        <div id="member-list-container">
+          <!-- メンバーリストがここに動的に表示される -->
+        </div>
+        <div class="member-actions">
+          <button id="add-member-btn" class="btn btn-secondary">
+            メンバー追加
+          </button>
+        </div>
+      </section>
 
-        <section id="settings-section" class="card">
-            <h2>チーム分け設定</h2>
-            <form id="team-assignment-form">
-                <div class="form-group">
-                    <label>
-                        <input type="radio" name="mode" value="teamCount" checked>
-                        チーム数を指定
-                    </label>
-                    <input type="number" id="team-count-input" min="1" placeholder="例: 3">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="radio" name="mode" value="teamSize">
-                        1チームの人数を指定
-                    </label>
-                    <input type="number" id="team-size-input" min="1" placeholder="例: 4">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="radio" name="mode" value="constraint">
-                        制約付き分け
-                    </label>
-                    <div class="constraint-options">
-                        <select id="constraint-type">
-                            <option value="hiragana">ひらがなメンバーのみ</option>
-                            <option value="katakana">カタカナメンバーのみ</option>
-                        </select>
-                        <input type="number" id="constraint-count" min="0" placeholder="人数">
-                        <input type="number" id="other-team-count" min="1" placeholder="残りのチーム数">
-                    </div>
-                </div>
-                <button type="submit" id="execute-btn" class="btn btn-primary">チーム分け実行</button>
-            </form>
-        </section>
+      <section id="settings-section" class="card">
+        <h2>チーム分け設定</h2>
+        <form id="team-assignment-form">
+          <div class="form-group">
+            <label>
+              <input type="radio" name="mode" value="teamCount" checked />
+              チーム数を指定
+            </label>
+            <input
+              type="number"
+              id="team-count-input"
+              min="1"
+              placeholder="例: 3"
+            />
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="radio" name="mode" value="teamSize" />
+              1チームの人数を指定
+            </label>
+            <input
+              type="number"
+              id="team-size-input"
+              min="1"
+              placeholder="例: 4"
+            />
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="radio" name="mode" value="constraint" />
+              制約付き分け
+            </label>
+            <div class="constraint-options">
+              <select id="constraint-type">
+                <option value="hiragana">ひらがなメンバーのみ</option>
+                <option value="katakana">カタカナメンバーのみ</option>
+              </select>
+              <input
+                type="number"
+                id="constraint-count"
+                min="0"
+                placeholder="人数"
+              />
+              <input
+                type="number"
+                id="other-team-count"
+                min="1"
+                placeholder="残りのチーム数"
+              />
+            </div>
+          </div>
+          <button type="submit" id="execute-btn" class="btn btn-primary">
+            チーム分け実行
+          </button>
+        </form>
+      </section>
 
-        <section id="team-result-section" class="card" style="display: none;">
-            <div class="result-header">
-                <h2>チーム分け結果</h2>
-                <div class="result-actions">
-                    <button id="toggle-view-btn" class="btn btn-secondary">表示切替</button>
-                    <button id="re-execute-btn" class="btn btn-secondary">再抽選</button>
-                    <button id="export-image-btn" class="btn btn-secondary">画像保存</button>
-                </div>
-            </div>
-            <div id="team-result-container">
-                <!-- チーム分け結果がここに動的に表示される -->
-            </div>
-        </section>
+      <section id="team-result-section" class="card" style="display: none">
+        <div class="result-header">
+          <h2>チーム分け結果</h2>
+          <div class="result-actions">
+            <button id="toggle-view-btn" class="btn btn-secondary">
+              表示切替
+            </button>
+            <button id="re-execute-btn" class="btn btn-secondary">
+              再抽選
+            </button>
+            <button id="export-image-btn" class="btn btn-secondary">
+              画像保存
+            </button>
+          </div>
+        </div>
+        <div id="team-result-container">
+          <!-- チーム分け結果がここに動的に表示される -->
+        </div>
+      </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 NAiS Project Team</p>
+      <p>&copy; 2025 NAiS Project Team</p>
     </footer>
 
     <script src="app.js"></script>
-</body>
+  </body>
 </html>
