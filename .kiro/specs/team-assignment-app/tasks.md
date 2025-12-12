@@ -7,7 +7,7 @@
 ## タスクリスト
 
 - [ ] 1. プロジェクト基盤構築
-- [ ] 1.1 (P) HTML 構造とスタイルシート基盤を作成
+- [x] 1.1 (P) HTML 構造とスタイルシート基盤を作成
 
   - index.html にセマンティック HTML 要素を配置(header, main, section)
   - style.css に CSS カスタムプロパティ(`--primary-color: #2196F3`)とリセットスタイルを定義
