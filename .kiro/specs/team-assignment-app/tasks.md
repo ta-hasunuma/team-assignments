@@ -15,7 +15,7 @@
   - Flexbox/Grid レイアウトの基本構造を実装
   - _Requirements: 8.1, 8.2, 9.1, 9.2_
 
-- [ ] 1.2 (P) JavaScript アプリケーション初期化構造を構築
+- [x] 1.2 (P) JavaScript アプリケーション初期化構造を構築
 
   - app.js にアプリケーションエントリーポイントを作成
   - DOMContentLoaded イベントでアプリ初期化を実装
