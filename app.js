@@ -579,7 +579,7 @@ class MemberManager {
   addMember(name, type) {
     // Validate name
     if (!name || name.trim().length === 0) {
-      return errorResult("メンバー名を入力してください");
+      return errorResult("メンバー名は1文字以上で入力してください");
     }
 
     // Validate type
@@ -596,7 +596,14 @@ class MemberManager {
     };
 
     this.members.push(newMember);
-    this._saveToStorage();
+
+    try {
+      this._saveToStorage();
+    } catch (error) {
+      // Rollback: remove the member we just added
+      this.members.pop();
+      return errorResult(error.message);
+    }
 
     return okResult(newMember);
   }
@@ -610,7 +617,7 @@ class MemberManager {
   updateMember(id, name) {
     // Validate name
     if (!name || name.trim().length === 0) {
-      return errorResult("メンバー名を入力してください");
+      return errorResult("メンバー名は1文字以上で入力してください");
     }
 
     // Find member
@@ -620,8 +627,16 @@ class MemberManager {
     }
 
     // Update member
+    const oldName = this.members[memberIndex].name;
     this.members[memberIndex].name = name.trim();
-    this._saveToStorage();
+
+    try {
+      this._saveToStorage();
+    } catch (error) {
+      // Rollback: restore old name
+      this.members[memberIndex].name = oldName;
+      return errorResult(error.message);
+    }
 
     return okResult(this.members[memberIndex]);
   }
@@ -639,8 +654,15 @@ class MemberManager {
     }
 
     // Remove member
-    this.members.splice(memberIndex, 1);
-    this._saveToStorage();
+    const deletedMember = this.members.splice(memberIndex, 1)[0];
+
+    try {
+      this._saveToStorage();
+    } catch (error) {
+      // Rollback: restore deleted member
+      this.members.splice(memberIndex, 0, deletedMember);
+      return errorResult(error.message);
+    }
 
     return okResult(true);
   }
@@ -648,9 +670,17 @@ class MemberManager {
   /**
    * Save members to SessionStorage
    * @private
+   * @throws {Error} If SessionStorage quota exceeded
    */
   _saveToStorage() {
-    sessionStorage.setItem(this.storageKey, JSON.stringify(this.members));
+    try {
+      sessionStorage.setItem(this.storageKey, JSON.stringify(this.members));
+    } catch (error) {
+      console.error("SessionStorage保存に失敗しました:", error);
+      throw new Error(
+        "データの保存に失敗しました。ストレージの容量を確認してください。"
+      );
+    }
   }
 
   /**
@@ -1130,4 +1160,29 @@ function initApp() {
 // Register DOMContentLoaded event listener
 if (typeof window !== "undefined") {
   document.addEventListener("DOMContentLoaded", initApp);
+
+  // Register global error handler
+  window.onerror = function (message, source, lineno, colno, error) {
+    console.error("Global error caught:", {
+      message,
+      source,
+      lineno,
+      colno,
+      error,
+    });
+
+    // Show user-friendly error message
+    const errorMsg =
+      "予期しないエラーが発生しました。ページを再読み込みしてください。";
+
+    // Only show alert if not already showing one (prevent cascade)
+    if (!window._errorAlertShowing) {
+      window._errorAlertShowing = true;
+      alert(errorMsg);
+      window._errorAlertShowing = false;
+    }
+
+    // Return true to prevent default error handling
+    return true;
+  };
 }
