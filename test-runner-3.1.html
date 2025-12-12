@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TDD Test Runner - Task 3.1</title>
+    <style>
+      body {
+        font-family: monospace;
+        padding: 20px;
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+      }
+      h1 {
+        color: #4ec9b0;
+      }
+      #test-output {
+        background-color: #252526;
+        padding: 15px;
+        border-radius: 5px;
+        white-space: pre-wrap;
+        font-size: 14px;
+      }
+      .pass {
+        color: #4ec9b0;
+      }
+      .fail {
+        color: #f48771;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TDD Test Runner - Task 3.1: TeamAssignmentEngine</h1>
+    <div id="test-output">Running tests...</div>
+
+    <script src="app.js"></script>
+    <script src="app.test-3.1.js"></script>
+
+    <script>
+      // Capture console output
+      const testOutput = document.getElementById("test-output");
+      const originalLog = console.log;
+      const originalError = console.error;
+
+      console.log = function (...args) {
+        const message = args.join(" ");
+        testOutput.innerHTML += message + "\n";
+        originalLog.apply(console, args);
+      };
+
+      console.error = function (...args) {
+        const message = args.join(" ");
+        testOutput.innerHTML += '<span class="fail">' + message + "</span>\n";
+        originalError.apply(console, args);
+      };
+
+      // Run tests after DOM loads
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(runTask31Tests, 100);
+      });
+    </script>
+  </body>
+</html>

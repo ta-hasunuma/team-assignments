@@ -50,19 +50,124 @@ class AppController {
    * - Load initial members
    */
   init() {
-    // Get DOM references
+    // Get DOM references - Member List
     this.memberListContainer = document.getElementById("member-list-container");
     this.addMemberBtn = document.getElementById("add-member-btn");
 
-    // Register event listeners
+    // Get DOM references - Settings
+    this.teamAssignmentForm = document.getElementById("team-assignment-form");
+    this.modeRadios = document.querySelectorAll('input[name="mode"]');
+    this.teamCountInput = document.getElementById("team-count-input");
+    this.teamSizeInput = document.getElementById("team-size-input");
+    this.constraintType = document.getElementById("constraint-type");
+    this.constraintCount = document.getElementById("constraint-count");
+    this.otherTeamCount = document.getElementById("other-team-count");
+
+    // Register event listeners - Member List
     this.addMemberBtn.addEventListener("click", () =>
       this._showAddMemberForm()
     );
 
+    // Register event listeners - Settings
+    this.modeRadios.forEach((radio) => {
+      radio.addEventListener("change", () => this._handleModeChange());
+    });
+
+    this.teamAssignmentForm.addEventListener("submit", (e) =>
+      this._handleFormSubmit(e)
+    );
+
+    // Initialize UI state
+    this._handleModeChange();
+
     // Render initial members
     this._renderMemberList();
 
-    console.log("AppController initialized with member list UI");
+    console.log("AppController initialized with member list and settings UI");
+  }
+
+  /**
+   * Handle mode change
+   * @private
+   */
+  _handleModeChange() {
+    const selectedMode = document.querySelector(
+      'input[name="mode"]:checked'
+    ).value;
+
+    // Disable all inputs first
+    this.teamCountInput.disabled = true;
+    this.teamSizeInput.disabled = true;
+    this.constraintType.disabled = true;
+    this.constraintCount.disabled = true;
+    this.otherTeamCount.disabled = true;
+
+    // Enable inputs based on selected mode
+    if (selectedMode === "teamCount") {
+      this.teamCountInput.disabled = false;
+    } else if (selectedMode === "teamSize") {
+      this.teamSizeInput.disabled = false;
+    } else if (selectedMode === "constraint") {
+      this.constraintType.disabled = false;
+      this.constraintCount.disabled = false;
+      this.otherTeamCount.disabled = false;
+    }
+  }
+
+  /**
+   * Handle form submission
+   * @private
+   */
+  _handleFormSubmit(event) {
+    event.preventDefault();
+
+    const selectedMode = document.querySelector(
+      'input[name="mode"]:checked'
+    ).value;
+
+    let config;
+
+    if (selectedMode === "teamCount") {
+      const teamCount = parseInt(this.teamCountInput.value);
+      if (!teamCount || teamCount < 1) {
+        alert("チーム数を1以上で入力してください");
+        return;
+      }
+      config = { mode: "teamCount", teamCount };
+    } else if (selectedMode === "teamSize") {
+      const teamSize = parseInt(this.teamSizeInput.value);
+      if (!teamSize || teamSize < 1) {
+        alert("1チームの人数を1以上で入力してください");
+        return;
+      }
+      config = { mode: "teamSize", teamSize };
+    } else if (selectedMode === "constraint") {
+      const type = this.constraintType.value;
+      const count = parseInt(this.constraintCount.value);
+      const otherCount = parseInt(this.otherTeamCount.value);
+
+      if (count < 0) {
+        alert("制約メンバー数を0以上で入力してください");
+        return;
+      }
+      if (!otherCount || otherCount < 1) {
+        alert("残りのチーム数を1以上で入力してください");
+        return;
+      }
+
+      config = {
+        mode: "constraint",
+        constraint: { type, count },
+        otherTeamCount: otherCount,
+      };
+    }
+
+    // Execute team assignment (will be implemented in task 4)
+    const result = this.executeTeamAssignment(config);
+
+    if (!result.ok) {
+      alert(result.error);
+    }
   }
 
   /**
@@ -440,8 +545,220 @@ class TeamAssignmentEngine {
    * @returns {Object} Result with teams or error
    */
   assignTeams(members, config) {
-    // Will be implemented in task 3.1
-    return okResult([]);
+    // Validate inputs
+    if (!members || members.length === 0) {
+      return errorResult("メンバーが登録されていません");
+    }
+
+    // Route to appropriate distribution method
+    if (config.mode === "teamCount") {
+      return this._distributeByTeamCount(members, config.teamCount);
+    } else if (config.mode === "teamSize") {
+      return this._distributeByTeamSize(members, config.teamSize);
+    } else if (config.mode === "constraint") {
+      return this._assignWithConstraint(
+        members,
+        config.constraint,
+        config.otherTeamCount
+      );
+    } else {
+      return errorResult("無効なチーム分けモードです");
+    }
+  }
+
+  /**
+   * Fisher-Yates shuffle algorithm
+   * @private
+   * @param {Array} array - Array to shuffle
+   * @returns {Array} New shuffled array
+   */
+  _shuffle(array) {
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  }
+
+  /**
+   * Distribute by team count
+   * @private
+   * @param {Array} members - Member array
+   * @param {number} teamCount - Number of teams
+   * @returns {Object} Result with teams or error
+   */
+  _distributeByTeamCount(members, teamCount) {
+    // Validate team count
+    if (!teamCount || teamCount < 1) {
+      return errorResult("チーム数は1以上である必要があります");
+    }
+
+    if (teamCount > members.length) {
+      return errorResult("チーム数がメンバー数を超えています");
+    }
+
+    // Shuffle members
+    const shuffled = this._shuffle(members);
+
+    // Calculate base team size and remainder
+    const baseSize = Math.floor(shuffled.length / teamCount);
+    const remainder = shuffled.length % teamCount;
+
+    // Distribute members to teams
+    const teams = [];
+    let memberIndex = 0;
+
+    for (let i = 0; i < teamCount; i++) {
+      const teamSize = baseSize + (i < remainder ? 1 : 0);
+      const teamMembers = shuffled.slice(memberIndex, memberIndex + teamSize);
+      memberIndex += teamSize;
+
+      teams.push({
+        id: this._generateUUID(),
+        name: `チーム${i + 1}`,
+        members: teamMembers,
+      });
+    }
+
+    return okResult(teams);
+  }
+
+  /**
+   * Distribute by team size
+   * @private
+   * @param {Array} members - Member array
+   * @param {number} teamSize - Size of each team
+   * @returns {Object} Result with teams or error
+   */
+  _distributeByTeamSize(members, teamSize) {
+    // Validate team size
+    if (!teamSize || teamSize < 1) {
+      return errorResult("1チームの人数は1以上である必要があります");
+    }
+
+    // Shuffle members
+    const shuffled = this._shuffle(members);
+
+    // Distribute members to teams
+    const teams = [];
+    let memberIndex = 0;
+    let teamNumber = 1;
+
+    while (memberIndex < shuffled.length) {
+      const teamMembers = shuffled.slice(memberIndex, memberIndex + teamSize);
+      memberIndex += teamSize;
+
+      teams.push({
+        id: this._generateUUID(),
+        name: `チーム${teamNumber}`,
+        members: teamMembers,
+      });
+
+      teamNumber++;
+    }
+
+    return okResult(teams);
+  }
+
+  /**
+   * Assign with constraint (hiragana or katakana only team)
+   * @private
+   * @param {Array} members - All members
+   * @param {Object} constraint - Constraint configuration
+   * @param {number} otherTeamCount - Number of teams for remaining members
+   * @returns {Object} Result with teams or error
+   */
+  _assignWithConstraint(members, constraint, otherTeamCount) {
+    // Validate constraint
+    if (!constraint || !constraint.type || constraint.count === undefined) {
+      return errorResult("制約条件が不正です");
+    }
+
+    if (constraint.count < 0) {
+      return errorResult("制約メンバー数は0以上である必要があります");
+    }
+
+    if (!otherTeamCount || otherTeamCount < 1) {
+      return errorResult("残りのチーム数は1以上である必要があります");
+    }
+
+    // Separate members by type
+    const constraintMembers = members.filter((m) => m.type === constraint.type);
+    const otherMembers = members.filter((m) => m.type !== constraint.type);
+
+    // Validate constraint count
+    if (constraint.count > constraintMembers.length) {
+      return errorResult(
+        `${constraint.type}メンバーが不足しています（指定: ${constraint.count}人, 実際: ${constraintMembers.length}人）`
+      );
+    }
+
+    const teams = [];
+
+    // Create constraint team if count > 0
+    if (constraint.count > 0) {
+      const shuffledConstraint = this._shuffle(constraintMembers);
+      const constraintTeamMembers = shuffledConstraint.slice(
+        0,
+        constraint.count
+      );
+
+      teams.push({
+        id: this._generateUUID(),
+        name: "チーム1",
+        members: constraintTeamMembers,
+      });
+
+      // Add unused constraint members to other members
+      const unusedConstraint = shuffledConstraint.slice(constraint.count);
+      otherMembers.push(...unusedConstraint);
+    }
+
+    // Distribute remaining members
+    if (otherMembers.length > 0) {
+      const shuffledOthers = this._shuffle(otherMembers);
+      const baseSize = Math.floor(shuffledOthers.length / otherTeamCount);
+      const remainder = shuffledOthers.length % otherTeamCount;
+
+      let memberIndex = 0;
+      const startTeamNumber = teams.length + 1;
+
+      for (let i = 0; i < otherTeamCount; i++) {
+        const teamSize = baseSize + (i < remainder ? 1 : 0);
+        const teamMembers = shuffledOthers.slice(
+          memberIndex,
+          memberIndex + teamSize
+        );
+        memberIndex += teamSize;
+
+        if (teamMembers.length > 0) {
+          teams.push({
+            id: this._generateUUID(),
+            name: `チーム${startTeamNumber + i}`,
+            members: teamMembers,
+          });
+        }
+      }
+    }
+
+    return okResult(teams);
+  }
+
+  /**
+   * Generate a simple UUID (v4-like)
+   * @private
+   * @returns {string} UUID string
+   */
+  _generateUUID() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      }
+    );
   }
 }
 

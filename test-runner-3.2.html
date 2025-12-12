@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TDD Test Runner - Task 3.2</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        background-color: #1e1e1e;
+      }
+      #test-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 400px;
+        height: 100vh;
+        background-color: #252526;
+        color: #d4d4d4;
+        padding: 20px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 12px;
+        border-left: 2px solid #4ec9b0;
+      }
+      #test-output {
+        white-space: pre-wrap;
+      }
+      #app-container {
+        margin-right: 420px;
+      }
+      h1 {
+        color: #4ec9b0;
+        font-size: 16px;
+      }
+      .fail {
+        color: #f48771;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="test-panel">
+      <h1>Task 3.2 Tests</h1>
+      <div id="test-output">Running tests...</div>
+    </div>
+
+    <div id="app-container">
+      <!-- Copy the settings section structure here -->
+      <header>
+        <h1>チーム分けアプリ for NAiS</h1>
+        <p class="subtitle">チーム分け設定UIテスト</p>
+      </header>
+
+      <main>
+        <section id="settings-section" class="card">
+          <h2>チーム分け設定</h2>
+          <form id="team-assignment-form">
+            <div class="form-group">
+              <label>
+                <input type="radio" name="mode" value="teamCount" checked />
+                チーム数を指定
+              </label>
+              <input
+                type="number"
+                id="team-count-input"
+                min="1"
+                placeholder="例: 3"
+              />
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="radio" name="mode" value="teamSize" />
+                1チームの人数を指定
+              </label>
+              <input
+                type="number"
+                id="team-size-input"
+                min="1"
+                placeholder="例: 4"
+              />
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="radio" name="mode" value="constraint" />
+                制約付き分け
+              </label>
+              <div class="constraint-options">
+                <select id="constraint-type">
+                  <option value="hiragana">ひらがなメンバーのみ</option>
+                  <option value="katakana">カタカナメンバーのみ</option>
+                </select>
+                <input
+                  type="number"
+                  id="constraint-count"
+                  min="0"
+                  placeholder="人数"
+                />
+                <input
+                  type="number"
+                  id="other-team-count"
+                  min="1"
+                  placeholder="残りのチーム数"
+                />
+              </div>
+            </div>
+            <button type="submit" id="execute-btn" class="btn btn-primary">
+              チーム分け実行
+            </button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="app.test-3.2.js"></script>
+
+    <script>
+      // Capture console output
+      const testOutput = document.getElementById("test-output");
+      const originalLog = console.log;
+      const originalError = console.error;
+
+      console.log = function (...args) {
+        const message = args.join(" ");
+        testOutput.innerHTML += message + "\n";
+        originalLog.apply(console, args);
+      };
+
+      console.error = function (...args) {
+        const message = args.join(" ");
+        testOutput.innerHTML += '<span class="fail">' + message + "</span>\n";
+        originalError.apply(console, args);
+      };
+
+      // Initialize app
+      document.addEventListener("DOMContentLoaded", () => {
+        // Create minimal controller for testing
+        const memberManager = new MemberManager();
+        memberManager.initializeMembers();
+
+        const appController = new AppController();
+        appController.memberManager = memberManager;
+        appController.teamAssignmentEngine = new TeamAssignmentEngine();
+        appController.imageExporter = new ImageExporter();
+        appController.init();
+
+        // Run tests after initialization
+        setTimeout(runTask32Tests, 500);
+      });
+    </script>
+  </body>
+</html>
