@@ -41,6 +41,7 @@ class AppController {
     this.teamAssignmentEngine = null;
     this.imageExporter = null;
     this.lastConfig = null; // Store last configuration for re-execution
+    this.lastTeams = null; // Store last team assignment results
   }
 
   /**
@@ -66,6 +67,7 @@ class AppController {
     // Get DOM references - Team Result
     this.teamResultSection = document.getElementById("team-result-section");
     this.teamResultContainer = document.getElementById("team-result-container");
+    this.toggleViewBtn = document.getElementById("toggle-view-btn");
     this.reExecuteBtn = document.getElementById("re-execute-btn");
     this.exportImageBtn = document.getElementById("export-image-btn");
 
@@ -84,6 +86,12 @@ class AppController {
     );
 
     // Register event listeners - Team Result
+    if (this.toggleViewBtn) {
+      this.toggleViewBtn.addEventListener("click", () =>
+        this._handleToggleView()
+      );
+    }
+
     if (this.reExecuteBtn) {
       this.reExecuteBtn.addEventListener("click", () =>
         this._handleReExecute()
@@ -187,6 +195,31 @@ class AppController {
     if (!result.ok) {
       alert(result.error);
     }
+  }
+
+  /**
+   * Handle toggle view button click
+   * @private
+   */
+  _handleToggleView() {
+    const container = this.teamResultContainer;
+
+    // Toggle list-view class
+    container.classList.toggle("list-view");
+
+    // Update button text
+    this._updateToggleButtonText();
+  }
+
+  /**
+   * Update toggle button text based on current view mode
+   * @private
+   */
+  _updateToggleButtonText() {
+    if (!this.toggleViewBtn) return;
+
+    const isListView = this.teamResultContainer.classList.contains("list-view");
+    this.toggleViewBtn.textContent = isListView ? "カード表示" : "リスト表示";
   }
 
   /**
@@ -411,6 +444,9 @@ class AppController {
    * @private
    */
   _showTeamResults(teams) {
+    // Store teams for re-rendering
+    this.lastTeams = teams;
+
     // Show result section
     this.teamResultSection.style.display = "block";
 
@@ -438,6 +474,9 @@ class AppController {
       teamCard.appendChild(memberList);
       this.teamResultContainer.appendChild(teamCard);
     });
+
+    // Update toggle button text based on current view
+    this._updateToggleButtonText();
 
     // Scroll to results
     this.teamResultSection.scrollIntoView({ behavior: "smooth" });

@@ -438,3 +438,35 @@ footer {
 .team-member-list li:last-child {
   border-bottom: none;
 }
+
+/* List View Mode */
+#team-result-container.list-view {
+  display: block;
+}
+
+#team-result-container.list-view .team-card {
+  margin-bottom: var(--spacing-md);
+  max-width: 100%;
+}
+
+#team-result-container.list-view .team-card h3 {
+  font-size: var(--font-size-base);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--primary-light);
+  margin: 0;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+#team-result-container.list-view .team-member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+}
+
+#team-result-container.list-view .team-member-list li {
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--background-color);
+  border-radius: calc(var(--border-radius) / 2);
+}
